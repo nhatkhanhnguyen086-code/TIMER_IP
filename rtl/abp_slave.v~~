@@ -1,0 +1,35 @@
+module apb_slave(
+	input wire clk, rst_n,
+	input wire pwrite,
+	input wire psel,
+	input wire penable,
+	input wire wr_err,
+	input wire [3:0]pstrb,
+
+	output wire wr_en0,
+	output wire wr_en1,
+	output wire wr_en2,
+	output wire wr_en3,
+	output reg pready,
+	output wire pslverr,
+	output wire rd_en
+);
+
+assign wr_en0 = pwrite && psel && penable && pready && pstrb[0];
+assign wr_en1 = pwrite && psel && penable && pready && pstrb[1];
+assign wr_en2 = pwrite && psel && penable && pready && pstrb[2];
+assign wr_en3 = pwrite && psel && penable && pready && pstrb[3];
+assign rd_en = !pwrite && psel && penable && pready;
+assign pslverr = wr_err;
+
+always @(posedge clk or negedge rst_n) begin
+	if(!rst_n) pready <= 1'b0;
+	else begin
+		if(pready) pready <= 1'b0;
+		else begin
+			pready <= (psel && penable);
+		end
+	end
+end
+
+endmodule
